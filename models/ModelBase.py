@@ -21,9 +21,10 @@ class Ingredient(Base):
     id_ingredient: Mapped[int] = mapped_column(primary_key=True)
     name_ingredient: Mapped[str] = mapped_column(String(100), nullable=False)
     unit: Mapped[str] = mapped_column(String(10), nullable=False)
-
+    is_visible: Mapped[bool] = mapped_column(default=True)
     drinks: Mapped[list['DrinkIngredient']] = relationship(back_populates='ingredient')
     inventory: Mapped[Optional['Inventory']] = relationship(back_populates='ingredient')
+    orders: Mapped[list['Order']] = relationship(back_populates='ingredient')
 
 
 class DrinkIngredient(Base):
@@ -52,9 +53,11 @@ class Order(Base):
 
     id_order: Mapped[int] = mapped_column(primary_key=True)
     id_drink: Mapped[int] = mapped_column(ForeignKey('drink.id_drink'), nullable=False)
+    id_ingredient: Mapped[int] = mapped_column(ForeignKey('ingredient.id_ingredient'), nullable=False)
     sugar_amount: Mapped[int] = mapped_column(Integer, nullable=False)
     payment_status: Mapped[str] = mapped_column(String(10), nullable=False)
     #created_at: Mapped[DateTime] = mapped_column(DateTime , server_default='now()')
     created_at: Mapped[DateTime] = mapped_column(TIMESTAMP , server_default=func.now())
 
     drink: Mapped['Drink'] = relationship(back_populates='orders')
+    ingredient: Mapped['Ingredient'] = relationship(back_populates='orders')

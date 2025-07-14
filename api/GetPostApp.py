@@ -52,6 +52,8 @@ async def create_order(
     result = await session.execute(stmt)
     drink = result.scalar_one_or_none()
 
+
+
     if not drink:
         print(f"ошибка нет напитка")
 

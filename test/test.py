@@ -54,6 +54,7 @@ class Ingredient(Base):
     __tablename__ = 'ingredient'
 
     id_ingredient: Mapped[int] = mapped_column(primary_key=True)
+    is_visible: Mapped[bool] = mapped_column(default=True, nullable=False)
     name_ingredient: Mapped[str] = mapped_column(String(100), nullable=False)
     unit: Mapped[str] = mapped_column(String(10), nullable=False)
 
