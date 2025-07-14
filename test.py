@@ -273,3 +273,4 @@ if __name__ == "__main__":
 
 # python main.py
 # http://127.0.0.1:8001/docs
+#пробую работу с гит

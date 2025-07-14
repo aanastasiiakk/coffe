@@ -1,16 +1,9 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, String, Numeric, Integer, DateTime
-from sqlmodel import SQLModel, Field, Session
 from typing import Optional
 
-DATABASE_URL = "postgresql+asyncpg://postgres:4585@localhost:5433/coffee"
-engine = create_async_engine(DATABASE_URL, echo=True)
-new_async_session = async_sessionmaker(engine, expire_on_commit=False)
+from sqlalchemy import String, Numeric, ForeignKey, Integer, DateTime, TIMESTAMP, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-
-class Base(DeclarativeBase):
-    pass
+from models.Base import Base
 
 
 class Drink(Base):
@@ -63,20 +56,7 @@ class Order(Base):
     id_drink: Mapped[int] = mapped_column(ForeignKey('drink.id_drink'), nullable=False)
     sugar_amount: Mapped[int] = mapped_column(Integer, nullable=False)
     payment_status: Mapped[str] = mapped_column(String(10), nullable=False)
-    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default='now()')
+    #created_at: Mapped[DateTime] = mapped_column(DateTime , server_default='now()')
+    created_at: Mapped[DateTime] = mapped_column(TIMESTAMP , server_default=func.now())
 
     drink: Mapped['Drink'] = relationship(back_populates='orders')
-
-
-async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-
-async def get_session() -> AsyncSession:
-    async with new_async_session() as session:
-        yield session
-
-
-
-
