@@ -1,8 +1,6 @@
 from typing import Optional
-
 from sqlalchemy import String, Numeric, ForeignKey, Integer, DateTime, TIMESTAMP, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from models.Base import Base
 
 

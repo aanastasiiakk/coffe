@@ -1,5 +1,5 @@
 from decimal import Decimal
-from fastapi import Depends, Body
+from fastapi import Depends, Body, APIRouter
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -8,30 +8,33 @@ from core.db import engine
 from core.get_db import get_db
 from models.ModelBase import Drink, Ingredient, DrinkIngredient, Inventory, Order
 from models.Schemas import DrinkGetSchema, OrderGetSchema, OrderPostSchema, IngredientGetSchema, IngredientDrinkGetSchema, InventoryGetSchema
-from app.main import app
 
-@app.post("/setup")
+
+
+myrouter=APIRouter()
+
+@myrouter.post("/setup")
 async def setup_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     return {"message": "Database tables recreated"}
 
-@app.get("/Drinks", response_model=list[DrinkGetSchema])
+@myrouter.get("/Drinks", response_model=list[DrinkGetSchema])
 async def get_drinks(session: AsyncSession=Depends(get_db)):
     stmt = select(Drink)
     result = await session.execute(stmt)
     drinks = result.scalars().all()
     return drinks
 
-@app.get("/Ingredients", response_model=list[IngredientGetSchema])
+@myrouter.get("/Ingredients", response_model=list[IngredientGetSchema])
 async def get_ingredients(session: AsyncSession=Depends(get_db)):
     stmt = select(Ingredient)
     result = await session.execute(stmt)
     ingredients = result.scalars().all()
     return ingredients
 
-@app.get("/Orders", response_model=list[OrderGetSchema])
+@myrouter.get("/Orders", response_model=list[OrderGetSchema])
 async def get_orders(session: AsyncSession=Depends(get_db)):
     stmt = select(Order).options(joinedload(Order.drink))  #select * from, stmt переменная содержащая скл запрос, joinload для загрузки связной таблицы напитки одновременно с заказами в одном запросе
     result = await session.execute(stmt) #await--ожидание ответа и завершение, execute --планирует и запускает запрос, session--подключение к бд
@@ -39,7 +42,7 @@ async def get_orders(session: AsyncSession=Depends(get_db)):
     return orders
 
 
-@app.post("/Orders", response_model=OrderGetSchema)
+@myrouter.post("/Orders", response_model=OrderGetSchema)
 async def create_order(
     order_input: OrderPostSchema = Body(...),
     session: AsyncSession = Depends(get_db)
@@ -100,14 +103,14 @@ async def create_order(
 
     return order_with_drink
 
-@app.get("/IngredintDrink", response_model=list[IngredientDrinkGetSchema]) #добавить фильтрацию
+@myrouter.get("/IngredintDrink", response_model=list[IngredientDrinkGetSchema]) #добавить фильтрацию
 async def get_DrinkIngredient(session: AsyncSession=Depends(get_db)):
     stmt = select(DrinkIngredient).options(joinedload(DrinkIngredient.drink), joinedload(DrinkIngredient.ingredient))  #select * from, stmt переменная содержащая скл запрос, joinload для загрузки связной таблицы напитки одновременно с заказами в одном запросе
     result = await session.execute(stmt) #await--ожидание ответа и завершение, execute --планирует и запускает запрос, session--подключение к бд
     drinkingredient = result.scalars().all()
     return drinkingredient
 
-@app.get("/Inventory", response_model=list[InventoryGetSchema]) #добавить фильтрацию
+@myrouter.get("/Inventory", response_model=list[InventoryGetSchema]) #добавить фильтрацию
 async def get_Inventory(session: AsyncSession=Depends(get_db)):
     stmt = select(Inventory).options( joinedload(Inventory.ingredient))  #select * from, stmt переменная содержащая скл запрос, joinload для загрузки связной таблицы напитки одновременно с заказами в одном запросе
     result = await session.execute(stmt) #await--ожидание ответа и завершение, execute --планирует и запускает запрос, session--подключение к бд
