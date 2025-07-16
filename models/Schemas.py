@@ -6,22 +6,28 @@ class DrinkGetSchema(BaseModel): #падантик модель схема да�
     name_drink: str
     price: float
 
+class IngredientGetSchema(
+    BaseModel):
+    id_ingredient: int
+    name_ingredient: str
+    unit: str
+    portion: int
+
+
 class OrderGetSchema(BaseModel):
     id_drink: int
     id_order: int
     payment_status: str
     created_at: datetime
     drink: DrinkGetSchema #drink relationship from modeldb order
+    ingredient: IngredientGetSchema
+
 
 class OrderPostSchema(BaseModel):
     id_drink: int
     sugar_amount: int = Field(..., ge=0, le=5)
-
-class IngredientGetSchema(
-    BaseModel):
     id_ingredient: int
-    name_ingredient: str
-    unit: str
+
 
 class IngredientDrinkGetSchema(
     BaseModel):

@@ -22,6 +22,7 @@ class Ingredient(Base):
     name_ingredient: Mapped[str] = mapped_column(String(100), nullable=False)
     unit: Mapped[str] = mapped_column(String(10), nullable=False)
     is_visible: Mapped[bool] = mapped_column(default=True)
+    portion: Mapped[int] = mapped_column(nullable=False)
     drinks: Mapped[list['DrinkIngredient']] = relationship(back_populates='ingredient')
     inventory: Mapped[Optional['Inventory']] = relationship(back_populates='ingredient')
     orders: Mapped[list['Order']] = relationship(back_populates='ingredient')
