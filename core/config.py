@@ -1,13 +1,38 @@
 
-# Конфигурация подключения
-POSTGRES_CONFIG = {
-    "user": "postgres",
-    "password": "4585",
-    "host": "localhost",
-    "port": "5433",
-    "database": "coffee"
-}
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
+class DBSettings(BaseSettings):
+    db_name: str
+    db_user: str
+    db_password: SecretStr
+    db_host: str
+    db_port: int
+    db_echo: bool = False
 
-SQLALCHEMY_DATABASE_URL = f"postgresql+asyncpg://{POSTGRES_CONFIG['user']}:{POSTGRES_CONFIG['password']}@{POSTGRES_CONFIG['host']}:{POSTGRES_CONFIG['port']}/{POSTGRES_CONFIG['database']}"
-ASYNCPG_DATABASE_URL = f"postgres://{POSTGRES_CONFIG['user']}:{POSTGRES_CONFIG['password']}@{POSTGRES_CONFIG['host']}:{POSTGRES_CONFIG['port']}/{POSTGRES_CONFIG['database']}"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    @property
+    def sqlalchemy_database_url(self) -> str:
+        return (
+            f"postgresql+asyncpg://{self.db_user}:"
+            f"{self.db_password.get_secret_value()}@"
+            f"{self.db_host}:{self.db_port}/{self.db_name}"
+        )
+
+    @property
+    def asyncpg_database_url(self) -> str:
+        return (
+            f"postgres://{self.db_user}:"
+            f"{self.db_password.get_secret_value()}@"
+            f"{self.db_host}:{self.db_port}/{self.db_name}"
+        )
+
+class Settings(BaseSettings):
+    db_settings: DBSettings = DBSettings()
+
+settings = Settings()
